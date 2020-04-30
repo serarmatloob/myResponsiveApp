@@ -85,6 +85,7 @@ public class SongsRepository {
      */
     public void loadTopTracks(String tag) {
         isLoading.setValue(true);
+        topTracks = new MutableLiveData<>();
         SongsApi songsApi = retrofit.create(SongsApi.class);
         songsApi.getTopTracks(Constants.API_KEY, tag).enqueue(new Callback<TopTracksResponse>() {
             @Override

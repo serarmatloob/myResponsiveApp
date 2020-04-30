@@ -16,6 +16,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.matloob.myresponsiveapp.R;
 import com.matloob.myresponsiveapp.adapter.TracksRecyclerAdapter;
 import com.matloob.myresponsiveapp.models.Track;
@@ -60,38 +61,42 @@ public class HomeFragment extends Fragment {
         setupRecyclerView(view);
         progressBar = view.findViewById(R.id.progress_bar);
 
-        int pos = 0;
-        if (savedInstanceState != null){
+        int selectedPosition = -1;
+
+        // If position is saved in instance state then retrieve it.
+        if (savedInstanceState != null) {
             currentTag = savedInstanceState.getString(CURRENT_TAG_KEY);
-            pos = savedInstanceState.getInt(SELECTED_ITEM_POS_KEY, -1);
+            selectedPosition = savedInstanceState.getInt(SELECTED_ITEM_POS_KEY, -1);
             savedInstanceState.clear();
         }
 
-        observeTagChange(currentTag, pos);
+        observeTagChange(selectedPosition);
     }
 
-    private void observeTagChange(final String currentTag, final int pos) {
+    private void observeTagChange(final int position) {
+
         homeViewModel.getTagName().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String tag) {
+
                 Log.i("TAG", "Selected tag: " + tag);
                 boolean shouldReload = true;
                 setActionBarTitle(tag);
                 if (currentTag != null) {
                     shouldReload = !currentTag.equals(tag);
                 }
-                if(shouldReload) {
+                if (shouldReload) {
                     recyclerView.scrollToPosition(0);
                 }
-                loadTopTagTracks(tag, shouldReload, pos);
+                loadTopTagTracks(tag, shouldReload, position);
             }
         });
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putString(CURRENT_TAG_KEY,  currentTag);
-        outState.putInt(SELECTED_ITEM_POS_KEY,  tracksRecyclerAdapter.getSelectedPosition());
+        outState.putString(CURRENT_TAG_KEY, currentTag);
+        outState.putInt(SELECTED_ITEM_POS_KEY, tracksRecyclerAdapter.getSelectedPosition());
         super.onSaveInstanceState(outState);
     }
 
@@ -102,13 +107,15 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadTopTagTracks(final String tag, final boolean shouldReload, final int pos) {
+        currentTag = tag;
         homeViewModel.loadTopTrackList(tag);
         homeViewModel.getTopTracksList().removeObservers(getViewLifecycleOwner());
         homeViewModel.getTopTracksList().observe(getViewLifecycleOwner(), new Observer<List<Track>>() {
             @Override
             public void onChanged(List<Track> tracks) {
-                tracksRecyclerAdapter.setTracks(tracks, shouldReload, pos);
-                currentTag = tag;
+                if (tracks.size() > 0) {
+                    tracksRecyclerAdapter.setTracks(tracks, shouldReload, pos);
+                }
             }
         });
 
