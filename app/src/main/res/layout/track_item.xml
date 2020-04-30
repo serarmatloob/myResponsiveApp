@@ -20,11 +20,17 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/text_item"
+            android:id="@+id/track_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Test"
             android:textSize="30sp" />
+        <TextView
+            android:id="@+id/artist_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test"
+            android:textSize="20sp" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

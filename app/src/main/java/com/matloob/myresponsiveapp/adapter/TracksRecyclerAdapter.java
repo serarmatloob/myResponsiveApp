@@ -56,16 +56,19 @@ public class TracksRecyclerAdapter extends RecyclerView.Adapter<TracksRecyclerAd
     }
 
     class ItemViewHolder extends RecyclerView.ViewHolder{
-        TextView textView;
+        TextView trackName;
+        TextView artistName;
         LinearLayout linearLayout;
         ItemViewHolder(View view) {
             super(view);
-            textView = view.findViewById(R.id.text_item);
+            trackName = view.findViewById(R.id.track_name);
+            artistName = view.findViewById(R.id.artist_name);
             linearLayout = view.findViewById(R.id.item_linear_layout);
         }
 
         void bind(Track track) {
-            textView.setText(track.getName());
+            trackName.setText(track.getName());
+            artistName.setText(track.getArtist().getName());
             if (selectedPosition == getAdapterPosition()){
                 linearLayout.setBackgroundColor(Color.argb(40, 100, 200, 100));
             }
