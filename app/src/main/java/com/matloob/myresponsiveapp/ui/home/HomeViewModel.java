@@ -13,6 +13,7 @@ import java.util.List;
 public class HomeViewModel extends ViewModel {
 
     private MutableLiveData<String> tagName = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
     private static SongsRepository songsRepository = null;
 
@@ -26,8 +27,12 @@ public class HomeViewModel extends ViewModel {
         return songsRepository.getTopTags();
     }
 
-    public LiveData<List<Track>> getTopTracksList(String tag) {
-        return songsRepository.getTopTracks(tag);
+    public void loadTopTrackList(String tag) {
+        songsRepository.loadTopTracks(tag);
+    }
+
+    public LiveData<List<Track>> getTopTracksList() {
+        return songsRepository.getTopTracks();
     }
 
     public LiveData<String> getTagName() {
@@ -36,5 +41,9 @@ public class HomeViewModel extends ViewModel {
 
     public void setTagName(String tagName) {
         this.tagName.setValue(tagName);
+    }
+
+    public LiveData<Boolean> getIsLoading() {
+        return songsRepository.getIsLoading();
     }
 }

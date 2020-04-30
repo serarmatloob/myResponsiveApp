@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     /**
      * Helper function to update navigation menu items
+     *
      * @param tags a {@link List<Tag>} array
      */
     private void updateNavigationMenu(List<Tag> tags) {
@@ -74,12 +75,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Menu menu = navigationView.getMenu();
         Menu submenu = menu.addSubMenu("Top Tags");
 
-        for(int i = 0; i< tags.size(); i++) {
-            submenu.add(0, i+1, 0, tags.get(i).getName()).setCheckable(true);
+        for (int i = 0; i < tags.size(); i++) {
+            submenu.add(0, i + 1, 0, tags.get(i).getName()).setCheckable(true);
         }
 
         // If no item is selected before then select first item
-        if(selectedItemId == -1) {
+        if (selectedItemId == -1) {
             navigationView.setCheckedItem(submenu.getItem(0));
             homeViewModel.setTagName(String.valueOf(submenu.getItem(0).getTitle()));
         }
@@ -143,14 +144,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else { // unlock the drawer and retrieve the default shadow color.
             drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             drawer.setScrimColor(0x99000000);
+            drawer.close();
         }
     }
-
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         // Save selected item if any
-        outState.putInt(SELECTED_ITEM_ID_KEY,  navigationView.getCheckedItem() != null ? navigationView.getCheckedItem().getItemId() : -1);
+        outState.putInt(SELECTED_ITEM_ID_KEY, navigationView.getCheckedItem() != null ? navigationView.getCheckedItem().getItemId() : -1);
         super.onSaveInstanceState(outState);
     }
 

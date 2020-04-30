@@ -33,6 +33,8 @@ public class SongsRepository {
 
     private MutableLiveData<List<Track>> topTracks = new MutableLiveData<>();
 
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
+
     public SongsRepository() {
         setupRetrofit();
         loadTopTags();
@@ -54,6 +56,7 @@ public class SongsRepository {
      * Function to load top tags from the API
      */
     private void loadTopTags() {
+        isLoading.setValue(true);
         SongsApi songsApi = retrofit.create(SongsApi.class);
         songsApi.getTopTags(Constants.API_KEY).enqueue(new Callback<TopTagsResponse>() {
             @Override
@@ -66,11 +69,13 @@ public class SongsRepository {
                         Log.i("TAG", "size "+ topTagsResponse.getToptags().getTag().size());
                     }
                 }
+                isLoading.setValue(false);
             }
 
             @Override
             public void onFailure(@Nullable Call<TopTagsResponse> call, @Nullable Throwable t) {
                 Log.i("TAG", "Failed: " + (t != null ? t.getMessage() : "Unknown error"));
+                isLoading.setValue(false);
             }
         });
     }
@@ -78,7 +83,8 @@ public class SongsRepository {
     /**
      * Function to load top tracks from the API
      */
-    private void loadTopTracks(String tag) {
+    public void loadTopTracks(String tag) {
+        isLoading.setValue(true);
         SongsApi songsApi = retrofit.create(SongsApi.class);
         songsApi.getTopTracks(Constants.API_KEY, tag).enqueue(new Callback<TopTracksResponse>() {
             @Override
@@ -91,13 +97,19 @@ public class SongsRepository {
                         Log.i("TAG", ""+ topTracksResponse.getTracks().getTrack());
                     }
                 }
+                isLoading.setValue(false);
             }
 
             @Override
             public void onFailure(@Nullable Call<TopTracksResponse> call, @Nullable Throwable t) {
                 Log.i("TAG", "Failed: " + (t != null ? t.getMessage() : "Unknown error"));
+                isLoading.setValue(false);
             }
         });
+    }
+
+    public LiveData<Boolean> getIsLoading() {
+        return isLoading;
     }
 
     /**
@@ -112,8 +124,7 @@ public class SongsRepository {
      * Returns list of Tags
      * @return a {@link LiveData} object
      */
-    public LiveData<List<Track>> getTopTracks(String tag) {
-        loadTopTracks(tag);
+    public LiveData<List<Track>> getTopTracks() {
         return topTracks;
     }
 }
