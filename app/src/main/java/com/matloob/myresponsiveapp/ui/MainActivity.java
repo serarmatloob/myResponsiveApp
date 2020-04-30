@@ -1,11 +1,9 @@
 package com.matloob.myresponsiveapp.ui;
 
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
 import android.view.Menu;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 import com.matloob.myresponsiveapp.R;
 
@@ -24,18 +22,27 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private DrawerLayout drawer;
     private NavigationView navigationView;
-    ActionBarDrawerToggle toggle;
+    private ActionBarDrawerToggle toggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+
+        // Setup toolbar and drawer layout.
+        setupNavigation();
+    }
+
+    /**
+     * This function sets up the toolbar and navigation drawer menu.
+     */
+    private void setupNavigation() {
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
 
-        mAppBarConfiguration = new AppBarConfiguration.Builder().setDrawerLayout(drawer).build();
+        mAppBarConfiguration = new AppBarConfiguration.Builder().build();
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
@@ -59,5 +66,30 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Update layout
+        updateLayoutVariation();
+    }
+
+    /**
+     * This is helper function to update layout variation.
+     */
+    private void updateLayoutVariation() {
+        // Get value from resource
+        boolean isTabletOrLandscape = getResources().getBoolean(R.bool.isLandscapeOrTablet);
+
+        if (isTabletOrLandscape) { // If landscape or tablet then lock the drawer open.
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+            drawer.setScrimColor(Color.TRANSPARENT);
+            // Hide hamburger icon
+            toolbar.setNavigationIcon(null);
+        } else { // unlock the drawer and retrieve the default shadow color.
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            drawer.setScrimColor(0x99000000);
+        }
     }
 }
