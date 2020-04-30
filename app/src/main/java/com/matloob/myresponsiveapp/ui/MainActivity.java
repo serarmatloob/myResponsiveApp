@@ -11,6 +11,7 @@ import com.matloob.myresponsiveapp.R;
 import com.matloob.myresponsiveapp.models.Tag;
 import com.matloob.myresponsiveapp.ui.home.HomeViewModel;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -24,13 +25,17 @@ import androidx.appcompat.widget.Toolbar;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private AppBarConfiguration mAppBarConfiguration;
     private Toolbar toolbar;
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private ActionBarDrawerToggle toggle;
+    private HomeViewModel homeViewModel;
+
+    private final static String SELECTED_ITEM_ID_KEY = "selectedItemId";
+    private int selectedItemId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         setupNavigation();
 
         // Access the shared view model
-        HomeViewModel homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
         // Observe changes in menu list
         homeViewModel.getTopTagsList().observe(this, new Observer<List<Tag>>() {
@@ -51,6 +56,12 @@ public class MainActivity extends AppCompatActivity {
                 updateNavigationMenu(tags);
             }
         });
+
+        if (savedInstanceState != null) {
+            // retrieve selected item if any
+            selectedItemId = savedInstanceState.getInt(SELECTED_ITEM_ID_KEY, -1);
+            Log.i("TAG", "Checked item? " + selectedItemId);
+        }
     }
 
     /**
@@ -58,16 +69,19 @@ public class MainActivity extends AppCompatActivity {
      * @param tags a {@link List<Tag>} array
      */
     private void updateNavigationMenu(List<Tag> tags) {
+        navigationView.getMenu().clear();
+
+        Menu menu = navigationView.getMenu();
+        Menu submenu = menu.addSubMenu("Top Tags");
+
         for(int i = 0; i< tags.size(); i++) {
-            navigationView.getMenu().add(0, i, 0, tags.get(i).getName()).setCheckable(true).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-                    toolbar.setTitle(menuItem.getTitle());
-                    navigationView.setCheckedItem(menuItem.getItemId());
-                    drawer.close();
-                    return false;
-                }
-            });
+            submenu.add(0, i+1, 0, tags.get(i).getName()).setCheckable(true);
+        }
+
+        // If no item is selected before then select first item
+        if(selectedItemId == -1) {
+            navigationView.setCheckedItem(submenu.getItem(0));
+            homeViewModel.setTagName(String.valueOf(submenu.getItem(0).getTitle()));
         }
     }
 
@@ -88,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
         toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
+        navigationView.setNavigationItemSelectedListener(this);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
     }
@@ -129,5 +144,22 @@ public class MainActivity extends AppCompatActivity {
             drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             drawer.setScrimColor(0x99000000);
         }
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // Save selected item if any
+        outState.putInt(SELECTED_ITEM_ID_KEY,  navigationView.getCheckedItem() != null ? navigationView.getCheckedItem().getItemId() : -1);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Log.i("TAG", "Selected " + item.getItemId());
+        navigationView.setCheckedItem(item.getItemId());
+        homeViewModel.setTagName(String.valueOf(item.getTitle()));
+        drawer.close();
+        return false;
     }
 }

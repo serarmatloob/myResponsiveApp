@@ -10,6 +10,8 @@ import com.matloob.myresponsiveapp.Constants;
 import com.matloob.myresponsiveapp.api.SongsApi;
 import com.matloob.myresponsiveapp.models.Tag;
 import com.matloob.myresponsiveapp.models.TopTagsResponse;
+import com.matloob.myresponsiveapp.models.TopTracksResponse;
+import com.matloob.myresponsiveapp.models.Track;
 
 import java.util.List;
 
@@ -28,6 +30,8 @@ public class SongsRepository {
     private Retrofit retrofit;
 
     private MutableLiveData<List<Tag>> topTags = new MutableLiveData<>();
+
+    private MutableLiveData<List<Track>> topTracks = new MutableLiveData<>();
 
     public SongsRepository() {
         setupRetrofit();
@@ -51,7 +55,7 @@ public class SongsRepository {
      */
     private void loadTopTags() {
         SongsApi songsApi = retrofit.create(SongsApi.class);
-        songsApi.getSongTags(Constants.API_KEY).enqueue(new Callback<TopTagsResponse>() {
+        songsApi.getTopTags(Constants.API_KEY).enqueue(new Callback<TopTagsResponse>() {
             @Override
             public void onResponse(@Nullable Call<TopTagsResponse> call, @Nullable Response<TopTagsResponse> response) {
                 if(response != null && response.body() != null) {
@@ -59,6 +63,7 @@ public class SongsRepository {
                     TopTagsResponse topTagsResponse = response.body();
                     if(topTagsResponse.getToptags() != null) {
                         topTags.setValue(topTagsResponse.getToptags().getTag());
+                        Log.i("TAG", "size "+ topTagsResponse.getToptags().getTag().size());
                     }
                 }
             }
@@ -71,10 +76,44 @@ public class SongsRepository {
     }
 
     /**
+     * Function to load top tracks from the API
+     */
+    private void loadTopTracks(String tag) {
+        SongsApi songsApi = retrofit.create(SongsApi.class);
+        songsApi.getTopTracks(Constants.API_KEY, tag).enqueue(new Callback<TopTracksResponse>() {
+            @Override
+            public void onResponse(@Nullable Call<TopTracksResponse> call, @Nullable Response<TopTracksResponse> response) {
+                if(response != null && response.body() != null) {
+                    Log.i("TAG", response.message());
+                    TopTracksResponse topTracksResponse = response.body();
+                    if(topTracksResponse.getTracks() != null) {
+                        topTracks.setValue(topTracksResponse.getTracks().getTrack());
+                        Log.i("TAG", ""+ topTracksResponse.getTracks().getTrack());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@Nullable Call<TopTracksResponse> call, @Nullable Throwable t) {
+                Log.i("TAG", "Failed: " + (t != null ? t.getMessage() : "Unknown error"));
+            }
+        });
+    }
+
+    /**
      * Returns list of Tags
      * @return a {@link LiveData} object
      */
     public LiveData<List<Tag>> getTopTags() {
         return topTags;
+    }
+
+    /**
+     * Returns list of Tags
+     * @return a {@link LiveData} object
+     */
+    public LiveData<List<Track>> getTopTracks(String tag) {
+        loadTopTracks(tag);
+        return topTracks;
     }
 }
